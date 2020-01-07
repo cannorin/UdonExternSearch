@@ -160,6 +160,9 @@ let private viewExtern (info: ExternInfo) =
     ]
   ]
 
+let private containsCaseInsensitive (str: string) (substr: string) =
+  str.ToLower().Contains(substr.ToLower())
+
 let private view model dispatch = 
   body [] [
     Section.section [] [
@@ -200,7 +203,7 @@ let private view model dispatch =
         Content.content [] [
           match model.Data with
           | Some data ->
-            let xs = data |> Seq.filter (fun (k, _) -> model.Query |> Array.forall k.Contains)
+            let xs = data |> Seq.filter (fun (k, _) -> model.Query |> Array.forall (containsCaseInsensitive k))
             Container.container [ ] [
                 if Seq.isEmpty xs then
                   yield

@@ -22,7 +22,7 @@ type ExternInfo = { Namespace: string; Type: ExternType<string>; Signature: stri
 type State = Initial | IsTyping | StoppedTyping
 
 type Model = {
-  Query : string
+  Query : string[]
   Data: (string * ExternInfo[])[] option
   Debouncer: Debouncer.State
   InputState: State
@@ -36,7 +36,7 @@ type Msg =
   | SetData of (string * ExternInfo[])[]
 
 let init _ =
-  { Query = ""; Data = None; Debouncer = Debouncer.create (); InputState = Initial },
+  { Query = [||]; Data = None; Debouncer = Debouncer.create (); InputState = Initial },
   Cmd.ofMsg LoadData
 
 open Thoth.Json
@@ -77,7 +77,8 @@ let private update msg model =
   | ChangeQuery newValue ->
     let dM, dC =
       model.Debouncer |> Debouncer.bounce (TimeSpan.FromSeconds 1.0) "user_input" EndOfInput
-    { model with Query = newValue; InputState = IsTyping; Debouncer = dM },
+    { model with Query = newValue.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
+                 InputState = IsTyping; Debouncer = dM },
     Cmd.batch [ Cmd.map DebouncerSelfMsg dC ]
   | EndOfInput ->
     { model with InputState = StoppedTyping }, Cmd.none
@@ -194,12 +195,12 @@ let private view model dispatch =
       ]
     ]
 
-    if model.InputState = StoppedTyping && String.IsNullOrWhiteSpace model.Query |> not then
+    if model.InputState = StoppedTyping && Array.isEmpty model.Query |> not then
       Section.section [] [
         Content.content [] [
           match model.Data with
           | Some data ->
-            let xs = data |> Seq.filter (fun (k, _) -> k.Contains model.Query)
+            let xs = data |> Seq.filter (fun (k, _) -> model.Query |> Array.forall k.Contains)
             Container.container [ ] [
                 if Seq.isEmpty xs then
                   yield

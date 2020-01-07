@@ -59,13 +59,6 @@ let getData () : Cmd<Msg> =
   promise {
     let url = "assets/udon_externs.json"
     let! data = Fetch.get(url, decoder)
-    let data =
-      data
-      |> Array.collect (fun (str, infos) -> 
-        [| str, infos
-           str.Split('.').[1], infos |])
-      |> Array.groupBy fst
-      |> Array.map (fun (str, xs) -> str, xs |> Array.map snd |> Array.concat)
     return SetData data
   } |> Cmd.OfPromise.result
 
@@ -102,10 +95,10 @@ let private viewExtern (info: ExternInfo) =
       | StaticGenericFunc (typrms, args, ret) ->
         "Static generic function",
         [
-          for typrm in typrms do
-            yield sprintf "type parameter: SystemType object of type %s" typrm
           for arg in args do
             yield sprintf "arg: %s" arg
+          for typrm in typrms do
+            yield sprintf "type parameter: SystemType object of type %s" typrm
           match ret with
           | None -> ()
           | Some r -> yield sprintf "output: %s" r
@@ -124,10 +117,10 @@ let private viewExtern (info: ExternInfo) =
         "Instance generic function",
         [
           yield sprintf "instance: %s" info.Namespace 
-          for typrm in typrms do
-            yield sprintf "type parameter: SystemType object of type %s" typrm
           for arg in args do
             yield sprintf "arg: %s" arg
+          for typrm in typrms do
+            yield sprintf "type parameter: SystemType object of type %s" typrm
           match ret with
           | None -> ()
           | Some r -> yield sprintf "output: %s" r

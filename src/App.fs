@@ -6,24 +6,15 @@ open Fable.React.Props
 open Fulma
 open Fable.FontAwesome
 open System
+open UdonBase
 
 open Thoth.Elmish
-
-type ExternType<'a> =
-  | StaticFunc of args:'a[] * ret:'a option
-  | StaticGenericFunc of typrm:string list * args:'a[] * ret:'a option
-  | InstanceFunc of args:'a[] * ret:'a option
-  | InstanceGenericFunc of typrm:string list * args:'a[] * ret:'a option
-  | Constructor of args:'a[] * ty:'a
-  | Unknown of arity:int * argret:'a[][]
-
-type ExternInfo = { Namespace: string; Type: ExternType<string>; Signature: string }
 
 type State = Initial | IsTyping | StoppedTyping
 
 type Model = {
   Query : string[]
-  Data: (string * ExternInfo[])[] option
+  Data: (string * ExternInfo<string>[])[] option
   Debouncer: Debouncer.State
   InputState: State
 }
@@ -33,7 +24,7 @@ type Msg =
   | ChangeQuery of string
   | EndOfInput
   | LoadData
-  | SetData of (string * ExternInfo[])[]
+  | SetData of (string * ExternInfo<string>[])[]
 
 let init _ =
   { Query = [||]; Data = None; Debouncer = Debouncer.create (); InputState = Initial },
@@ -50,7 +41,7 @@ let charCoder =
         if s.Length = 1 then Ok s.[0]
         else Error ("not a char", FailMessage "not a char")))
 
-let decoder : Decoder<(string * ExternInfo[])[]> =
+let decoder : Decoder<(string * ExternInfo<string>[])[]> =
   Decode.Auto.generateDecoderCached(extra=charCoder)
 
 open Thoth.Fetch
@@ -79,7 +70,7 @@ let private update msg model =
   | SetData data ->
     { model with Data = Some data }, Cmd.none
 
-let private viewExtern (info: ExternInfo) =
+let private viewExtern (info: ExternInfo<string>) =
   [
     let descr, table =
       match info.Type with

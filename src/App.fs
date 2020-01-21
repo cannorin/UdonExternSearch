@@ -173,6 +173,7 @@ let private view model dispatch =
             ]
           ]
         ]
+        p [] [str "UDONSDK version: 2020.01.14.10.47, VRCSDK3 version: 2020.01.14.10.40"]
         p [] [str "Udon で使える関数を検索できます．"]
         p [] [str "Here you can search extern functions available in Udon."]
         p [] [str "関数の完全名と，呼び出すにはスタックの何番目に何を入れればいいかを見ることができます．"]

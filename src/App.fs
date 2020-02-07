@@ -14,7 +14,7 @@ type State = Initial | IsTyping | StoppedTyping
 
 type Model = {
   Query : string[]
-  Data: (string * ExternInfo<string>[])[] option
+  Data: UdonInfo option
   Debouncer: Debouncer.State
   InputState: State
 }
@@ -24,7 +24,7 @@ type Msg =
   | ChangeQuery of string
   | EndOfInput
   | LoadData
-  | SetData of (string * ExternInfo<string>[])[]
+  | SetData of UdonInfo
 
 let init _ =
   { Query = [||]; Data = None; Debouncer = Debouncer.create (); InputState = Initial },
@@ -41,14 +41,14 @@ let charCoder =
         if s.Length = 1 then Ok s.[0]
         else Error ("not a char", FailMessage "not a char")))
 
-let decoder : Decoder<(string * ExternInfo<string>[])[]> =
+let decoder : Decoder<UdonInfo> =
   Decode.Auto.generateDecoderCached(extra=charCoder)
 
 open Thoth.Fetch
 
 let getData () : Cmd<Msg> =
   promise {
-    let url = "assets/udon_externs.json"
+    let url = "https://github.com/cannorin/UdonInfoExtractor/releases/latest/download/udon_info.json"
     let! data = Fetch.get(url, decoder)
     return SetData data
   } |> Cmd.OfPromise.result
@@ -97,7 +97,7 @@ let private viewExtern (info: ExternInfo<string>) =
       | InstanceFunc (args, ret) ->
         "Instance function",
         [
-          yield sprintf "instance: %s" info.Namespace 
+          yield sprintf "instance: %s" info.Namespace
           for arg in args do
             yield sprintf "arg: %s" arg
           match ret with
@@ -107,7 +107,7 @@ let private viewExtern (info: ExternInfo<string>) =
       | InstanceGenericFunc (typrms, args, ret) ->
         "Instance generic function",
         [
-          yield sprintf "instance: %s" info.Namespace 
+          yield sprintf "instance: %s" info.Namespace
           for arg in args do
             yield sprintf "arg: %s" arg
           for typrm in typrms do
@@ -147,7 +147,7 @@ let private viewExtern (info: ExternInfo<string>) =
 let private containsCaseInsensitive (str: string) (substr: string) =
   str.ToLower().Contains(substr.ToLower())
 
-let private view model dispatch = 
+let private view model dispatch =
   body [] [
     Section.section [] [
       Content.content [] [
@@ -164,7 +164,17 @@ let private view model dispatch =
             ]
           ]
         ]
-        p [] [str "UDONSDK version: 2020.01.14.10.47, VRCSDK3 version: 2020.01.14.10.40"]
+        p [] [
+          match model.Data with
+          | Some data ->
+            yield
+              str (
+                sprintf "UDONSDK version: %s, VRCSDK3 version: %s"
+                        data.UDONSDKVersion
+                        data.VRCSDK3Version
+              )
+          | None -> ()
+        ]
         p [] [str "Udon で使える関数を検索できます．"]
         p [] [str "Here you can search extern functions available in Udon."]
         p [] [str "関数の完全名と，呼び出すにはスタックの何番目に何を入れればいいかを見ることができます．"]
@@ -188,7 +198,7 @@ let private view model dispatch =
         Content.content [] [
           match model.Data with
           | Some data ->
-            let xs = data |> Seq.filter (fun (k, _) -> model.Query |> Array.forall (containsCaseInsensitive k))
+            let xs = data.Externs |> Seq.filter (fun (k, _) -> model.Query |> Array.forall (containsCaseInsensitive k))
             Container.container [ ] [
                 if Seq.isEmpty xs then
                   yield
@@ -198,7 +208,7 @@ let private view model dispatch =
                       ]
                     ]
                 for k, infos in xs do
-                  yield 
+                  yield
                     div [ ClassName "block" ] [
                       Box.box' [ ] [
                         h2 [] [str k]
@@ -212,7 +222,7 @@ let private view model dispatch =
         ]
       ]
   ]
-  
+
 
 open Elmish.Debug
 open Elmish.HMR

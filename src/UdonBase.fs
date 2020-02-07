@@ -56,3 +56,28 @@ type ExternInfo<'a> = { Namespace: string; Name:string; Type: ExternType<'a>; Si
 module ExternInfo =
   let map f info =
     { Namespace = info.Namespace; Name = info.Name; Signature = info.Signature; Type = ExternType.map f info.Type }
+
+type UdonTypeInfo<'a> = {
+  Type: 'a
+  ActualType: string
+  IsAbstract: bool
+  IsInterface: bool
+  IsClass: bool
+  IsValueType: bool
+  IsEnum: bool
+  IsPrimitive: bool
+  IsArray: bool;
+  IsGenericType: bool
+  GenericTypeArguments: 'a[]
+  BaseType: 'a option
+  AssignableTo: 'a[]
+}
+
+type UdonTypeContext<'a when 'a: comparison> = Map<'a, UdonTypeInfo<'a>>
+
+type UdonInfo = {
+  Externs: (string * ExternInfo<string>[]) []
+  Types:   UdonTypeContext<string>
+  UDONSDKVersion: string
+  VRCSDK3Version: string
+}

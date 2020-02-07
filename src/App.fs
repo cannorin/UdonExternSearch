@@ -48,7 +48,7 @@ open Thoth.Fetch
 
 let getData () : Cmd<Msg> =
   promise {
-    let url = "https://github.com/cannorin/UdonInfoExtractor/releases/latest/download/udon_info.json"
+    let url = "assets/udon_info.json"
     let! data = Fetch.get(url, decoder)
     return SetData data
   } |> Cmd.OfPromise.result

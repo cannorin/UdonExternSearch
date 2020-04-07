@@ -14,7 +14,7 @@ type State = Initial | IsTyping | StoppedTyping
 
 type Model = {
   Query : string[]
-  Data: UdonInfo option
+  Data: UdonInfo_Before20200223 option
   Debouncer: Debouncer.State
   InputState: State
 }
@@ -24,7 +24,7 @@ type Msg =
   | ChangeQuery of string
   | EndOfInput
   | LoadData
-  | SetData of UdonInfo
+  | SetData of UdonInfo_Before20200223
 
 let init _ =
   { Query = [||]; Data = None; Debouncer = Debouncer.create (); InputState = Initial },
@@ -41,7 +41,7 @@ let charCoder =
         if s.Length = 1 then Ok s.[0]
         else Error ("not a char", FailMessage "not a char")))
 
-let decoder : Decoder<UdonInfo> =
+let decoder : Decoder<UdonInfo_Before20200223> =
   Decode.Auto.generateDecoderCached(extra=charCoder)
 
 open Thoth.Fetch

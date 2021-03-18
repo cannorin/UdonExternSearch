@@ -1,6 +1,14 @@
 Udon Extern Search
 ==================
 
+## ARCHIVED!
+
+[UdonInfoExtractor](https://github.com/cannorin/UdonInfoExtractor) has stopped working for newer versions of VRCSDK, so it is unlikely to update the data.
+
+新しい VRCSDK で [UdonInfoExtractor](https://github.com/cannorin/UdonInfoExtractor) が動かなくなったので，データの更新が無理になりました．
+
+----
+
 Udon で使える関数を検索できます．
 
 You can search extern functions available in Udon.

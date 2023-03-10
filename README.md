@@ -1,6 +1,12 @@
 Udon Extern Search
 ==================
 
+## DEPRECATED!
+
+[UdonExternSearch2](https://github.com/cannorin/UdonExternSearch2) is now live!
+
+[UdonExternSearch2](https://github.com/cannorin/UdonExternSearch2) に移行しました！
+
 ## ARCHIVED!
 
 [UdonInfoExtractor](https://github.com/cannorin/UdonInfoExtractor) has stopped working for newer versions of VRCSDK, so it is unlikely to update the data.
